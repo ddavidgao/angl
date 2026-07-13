@@ -1,0 +1,183 @@
+# Classify Severity
+
+> Boundary: `classify_severity(event: object) -> string`
+> Runs as: `node`
+
+## Purpose
+
+This chapter defines the public behavior of `classify_severity`.
+
+## Behavior
+
+Classify an already normalized incident event. Return "sev1" if customer_impact is true
+and either error_budget_burn is at least 0.25 or signal_count is at least 10. Return
+"sev2" if error_budget_burn is at least 0.10 or signal_count is at least 5. Return
+"sev3" otherwise. Negative error_budget_burn or signal_count is invalid and must raise
+an error containing "negative".
+
+## Examples
+
+### Customer impact and high burn are present
+
+When customer impact and high burn are present, severity is sev1.
+
+Input `event`:
+```json
+{
+  "service": "payments-api",
+  "customer_impact": true,
+  "error_budget_burn": 0.4,
+  "signal_count": 12
+}
+```
+
+Returns:
+```json
+"sev1"
+```
+
+### No customer impact but burn is elevated
+
+When no customer impact but burn is elevated, severity is sev2.
+
+Input `event`:
+```json
+{
+  "service": "search",
+  "customer_impact": false,
+  "error_budget_burn": 0.12,
+  "signal_count": 3
+}
+```
+
+Returns:
+```json
+"sev2"
+```
+
+### Customer impact at the burn threshold is sev1
+
+When customer impact is true and burn is exactly 0.25, severity is sev1.
+
+Input `event`:
+```json
+{
+  "service": "payments-api",
+  "customer_impact": true,
+  "error_budget_burn": 0.25,
+  "signal_count": 0
+}
+```
+
+Returns:
+```json
+"sev1"
+```
+
+### Customer impact at the signal threshold is sev1
+
+When customer impact is true and signal count is exactly 10, severity is sev1.
+
+Input `event`:
+```json
+{
+  "service": "payments-api",
+  "customer_impact": true,
+  "error_budget_burn": 0.01,
+  "signal_count": 10
+}
+```
+
+Returns:
+```json
+"sev1"
+```
+
+### Burn at sev2 threshold without customer impact is sev2
+
+When burn is exactly 0.10 and there is no customer impact, severity is sev2.
+
+Input `event`:
+```json
+{
+  "service": "search",
+  "customer_impact": false,
+  "error_budget_burn": 0.1,
+  "signal_count": 0
+}
+```
+
+Returns:
+```json
+"sev2"
+```
+
+### Signal count at sev2 threshold is sev2
+
+When signal count is exactly 5 and there is no customer impact, severity is sev2.
+
+Input `event`:
+```json
+{
+  "service": "search",
+  "customer_impact": false,
+  "error_budget_burn": 0,
+  "signal_count": 5
+}
+```
+
+Returns:
+```json
+"sev2"
+```
+
+### Signals are low
+
+When signals are low, severity is sev3.
+
+Input `event`:
+```json
+{
+  "service": "docs",
+  "customer_impact": false,
+  "error_budget_burn": 0.01,
+  "signal_count": 1
+}
+```
+
+Returns:
+```json
+"sev3"
+```
+
+### Signal count is negative
+
+When signal count is negative, it errors.
+
+Input `event`:
+```json
+{
+  "service": "docs",
+  "customer_impact": false,
+  "error_budget_burn": 0.01,
+  "signal_count": -1
+}
+```
+
+Fails with error containing: negative
+
+### Error budget burn is negative
+
+When error budget burn is negative, it errors.
+
+Input `event`:
+```json
+{
+  "service": "docs",
+  "customer_impact": false,
+  "error_budget_burn": -0.01,
+  "signal_count": 1
+}
+```
+
+Fails with error containing: negative

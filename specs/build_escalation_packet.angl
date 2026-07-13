@@ -1,0 +1,235 @@
+# Build Escalation Packet
+
+> Boundary: `build_escalation_packet(raw_event: object, open_incidents: object) -> object`
+> Uses: `normalize_event`, `classify_severity`, `route_owner`, `dedupe_incident`, `compute_action`, `format_incident_title`
+
+## Purpose
+
+This chapter defines the public behavior of `build_escalation_packet`.
+
+## Behavior
+
+Build the final incident escalation packet by composing the verified boundary units.
+First normalize the raw event. Then classify severity. Then route the owner using the
+normalized event and severity. Then dedupe against open incidents. Then compute the
+action and format a title by calling the verified boundary units. Return a plain object
+with event_id, title, service, region, severity, owner, dedupe, and action. Propagate
+validation errors unchanged.
+
+## Examples
+
+### A customer-impacting payments event is new
+
+When a customer-impacting payments event is new, it pages and creates.
+
+Input `raw_event`:
+```json
+{
+  "event_id": "E-9",
+  "timestamp": "2030-03-01T10:00:00Z",
+  "svc": " Payments-API ",
+  "zone": "US-EAST",
+  "customer_impact": true,
+  "error_budget_burn": 0.4,
+  "signal_count": 12,
+  "fingerprint": "pay-500",
+  "minute": 200
+}
+```
+
+Input `open_incidents`:
+```json
+[]
+```
+
+Returns:
+```json
+{
+  "event_id": "E-9",
+  "title": "SEV1 payments-api (us-east)",
+  "service": "payments-api",
+  "region": "us-east",
+  "severity": "sev1",
+  "owner": {
+    "team": "payments",
+    "channel": "sre-oncall",
+    "page": true
+  },
+  "dedupe": {
+    "duplicate": false,
+    "incident_id": null
+  },
+  "action": "page-and-create"
+}
+```
+
+### A search event matches an existing incident
+
+When a search event matches an existing incident, it attaches to existing.
+
+Input `raw_event`:
+```json
+{
+  "event_id": "E-10",
+  "timestamp": "2030-03-01T10:05:00Z",
+  "service": "search",
+  "region": "global",
+  "customer_impact": false,
+  "error_budget_burn": 0.12,
+  "signal_count": 3,
+  "fingerprint": "search-latency",
+  "minute": 210
+}
+```
+
+Input `open_incidents`:
+```json
+[
+  {
+    "incident_id": "INC-42",
+    "fingerprint": "search-latency",
+    "region": "global",
+    "last_seen_minute": 190
+  }
+]
+```
+
+Returns:
+```json
+{
+  "event_id": "E-10",
+  "title": "SEV2 search (global)",
+  "service": "search",
+  "region": "global",
+  "severity": "sev2",
+  "owner": {
+    "team": "search",
+    "channel": "team-search",
+    "page": false
+  },
+  "dedupe": {
+    "duplicate": true,
+    "incident_id": "INC-42"
+  },
+  "action": "attach-to-existing"
+}
+```
+
+### Service is missing
+
+When service is missing, the normalization error propagates.
+
+Input `raw_event`:
+```json
+{
+  "event_id": "E-11",
+  "timestamp": "2030-03-01T10:05:00Z",
+  "fingerprint": "x",
+  "minute": 1
+}
+```
+
+Input `open_incidents`:
+```json
+[]
+```
+
+Fails with error containing: service
+
+### Unknown service creates a platform ticket
+
+When an unknown service is not severe and is not a duplicate, it creates a platform
+ticket.
+
+Input `raw_event`:
+```json
+{
+  "event_id": "E-12",
+  "timestamp": "2030-03-01T10:10:00Z",
+  "service": "internal-tool",
+  "region": "EU",
+  "customer_impact": false,
+  "error_budget_burn": 0.01,
+  "signal_count": 1,
+  "fingerprint": "tool-warning",
+  "minute": 220
+}
+```
+
+Input `open_incidents`:
+```json
+[]
+```
+
+Returns:
+```json
+{
+  "event_id": "E-12",
+  "title": "SEV3 internal-tool (eu)",
+  "service": "internal-tool",
+  "region": "eu",
+  "severity": "sev3",
+  "owner": {
+    "team": "platform",
+    "channel": "team-platform",
+    "page": false
+  },
+  "dedupe": {
+    "duplicate": false,
+    "incident_id": null
+  },
+  "action": "create-ticket"
+}
+```
+
+### Duplicate sev1 attaches instead of creating
+
+When a sev1 event matches an existing incident, it attaches instead of creating.
+
+Input `raw_event`:
+```json
+{
+  "event_id": "E-13",
+  "timestamp": "2030-03-01T10:12:00Z",
+  "service": "payments-api",
+  "region": "us-east",
+  "customer_impact": true,
+  "error_budget_burn": 0.3,
+  "signal_count": 1,
+  "fingerprint": "pay-500",
+  "minute": 225
+}
+```
+
+Input `open_incidents`:
+```json
+[
+  {
+    "incident_id": "INC-77",
+    "fingerprint": "pay-500",
+    "region": "us-east",
+    "last_seen_minute": 210
+  }
+]
+```
+
+Returns:
+```json
+{
+  "event_id": "E-13",
+  "title": "SEV1 payments-api (us-east)",
+  "service": "payments-api",
+  "region": "us-east",
+  "severity": "sev1",
+  "owner": {
+    "team": "payments",
+    "channel": "sre-oncall",
+    "page": true
+  },
+  "dedupe": {
+    "duplicate": true,
+    "incident_id": "INC-77"
+  },
+  "action": "attach-to-existing"
+}
+```

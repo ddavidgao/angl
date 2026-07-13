@@ -1,0 +1,110 @@
+# Picnic Normalize
+
+> Boundary: `picnic_normalize(request: object) -> object`
+
+## Purpose
+
+This chapter defines the public behavior of `picnic_normalize`.
+
+## Behavior
+
+Turn a loose picnic request into stable planning fields. If the request leaves something
+out, use these defaults:
+
+- guests: 2
+- budget: 40
+- temperature_f: 72
+- hours: 2
+- kids: false
+- vegetarian: false
+- location: "park"
+- mood: "easy"
+
+Guests, budget, and hours must be positive. Return guests, budget, temperature_f, hours,
+kids, vegetarian, location, and mood.
+
+## Examples
+
+### Only the guest count is known
+
+When only the guest count is known, the missing fields are filled from defaults.
+
+Input `request`:
+```json
+{
+  "guests": 4
+}
+```
+
+Returns:
+```json
+{
+  "guests": 4,
+  "budget": 40,
+  "temperature_f": 72,
+  "hours": 2,
+  "kids": false,
+  "vegetarian": false,
+  "location": "park",
+  "mood": "easy"
+}
+```
+
+### Every planning field is provided
+
+When every planning field is provided, preserve those values.
+
+Input `request`:
+```json
+{
+  "guests": 6,
+  "budget": 90,
+  "temperature_f": 88,
+  "hours": 4,
+  "kids": true,
+  "vegetarian": true,
+  "location": "beach",
+  "mood": "birthday"
+}
+```
+
+Returns:
+```json
+{
+  "guests": 6,
+  "budget": 90,
+  "temperature_f": 88,
+  "hours": 4,
+  "kids": true,
+  "vegetarian": true,
+  "location": "beach",
+  "mood": "birthday"
+}
+```
+
+### Guests is zero
+
+When guests is zero, reject the request.
+
+Input `request`:
+```json
+{
+  "guests": 0
+}
+```
+
+Fails with error containing: guests
+
+### Budget is negative
+
+When budget is negative, reject the request.
+
+Input `request`:
+```json
+{
+  "guests": 3,
+  "budget": -5
+}
+```
+
+Fails with error containing: budget

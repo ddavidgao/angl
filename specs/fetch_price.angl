@@ -1,0 +1,41 @@
+# Fetch Price
+
+> Boundary: `fetch_price(url: string) -> number`
+
+## Purpose
+
+This chapter defines the public behavior of `fetch_price`.
+
+## Behavior
+
+Fetch JSON from the given URL and return the "price" field as a number. Fail with an
+error mentioning "price" if the field is missing.
+
+## Examples
+
+### The URL serves {"price": 19.99}
+
+When the URL serves {"price": 19.99}, it returns 19.99.
+
+Fixture `http_fixture`:
+```json
+{
+  "price": 19.99
+}
+```
+
+Returns:
+```json
+19.99
+```
+
+### The JSON has no "price" field
+
+When the JSON has no "price" field, it errors, message contains "price".
+
+Fixture `http_fixture`:
+```json
+{}
+```
+
+Fails with error containing: price

@@ -1,0 +1,28 @@
+{
+  "name": "angl-cli",
+  "version": "0.1.12",
+  "description": "Contract-checked code regeneration from Angl behavior chapters",
+  "author": "David Gao",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ddavidgao/angl.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ddavidgao/angl/issues"
+  },
+  "homepage": "https://github.com/ddavidgao/angl#readme",
+  "bin": {
+    "angl": "bin/angl.js",
+    "angl-cli": "bin/angl.js"
+  },
+  "files": [
+    "angl/*.py",
+    "assets/*.svg",
+    "bin/angl.js",
+    "setup.py",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}

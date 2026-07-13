@@ -1,0 +1,91 @@
+# Count Stored Incidents
+
+> Boundary: `count_stored_incidents(db: object, severity: string) -> number`
+> Runs as: `python`
+
+## Purpose
+
+This chapter proves Angl can verify behavior that depends on a real Postgres
+database, not just pure JSON inputs.
+
+## Behavior
+
+The db argument is a plain JSON object from `postgres_fixture`, not an open
+database connection. It contains a `url` field with a Postgres connection string.
+Connect to that URL. Count rows in the incidents table whose severity equals the
+requested severity. Return the count as a number. If the database cannot be
+reached or the table is missing, raise the underlying database error.
+
+## Examples
+
+### Two sev1 incidents exist
+
+When two rows have severity sev1, it returns 2.
+
+Fixture `postgres_fixture`:
+```json
+{
+  "setup_sql": [
+    "create table incidents (id text primary key, severity text not null)",
+    "insert into incidents (id, severity) values ('INC-1', 'sev1'), ('INC-2', 'sev1'), ('INC-3', 'sev2')"
+  ]
+}
+```
+
+Input `severity`:
+```json
+"sev1"
+```
+
+Returns:
+```json
+2
+```
+
+### One sev2 incident exists
+
+When one row has severity sev2, it returns 1.
+
+Fixture `postgres_fixture`:
+```json
+{
+  "setup_sql": [
+    "create table incidents (id text primary key, severity text not null)",
+    "insert into incidents (id, severity) values ('INC-1', 'sev1'), ('INC-2', 'sev1'), ('INC-3', 'sev2')"
+  ]
+}
+```
+
+Input `severity`:
+```json
+"sev2"
+```
+
+Returns:
+```json
+1
+```
+
+### No matching severity exists
+
+When no row has the requested severity, it returns 0.
+
+Fixture `postgres_fixture`:
+```json
+{
+  "setup_sql": [
+    "create table incidents (id text primary key, severity text not null)",
+    "insert into incidents (id, severity) values ('INC-1', 'sev1')"
+  ]
+}
+```
+
+Input `severity`:
+```json
+"sev3"
+```
+
+Returns:
+```json
+0
+```

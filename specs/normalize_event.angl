@@ -1,0 +1,222 @@
+# Normalize Event
+
+> Boundary: `normalize_event(raw: object) -> object`
+
+## Purpose
+
+This chapter defines the public behavior of `normalize_event`.
+
+## Behavior
+
+Normalize a raw incident event into a stable object used by the rest of the triage
+pipeline. Accept service aliases "service" and "svc". Accept region aliases "region" and
+"zone". Trim and lowercase service and region. Default missing region to "global".
+Severity inputs are not normalized here. Keep the event_id, timestamp, service, region,
+customer_impact, error_budget_burn, signal_count, and fingerprint fields. If event_id,
+timestamp, no service alias, or fingerprint is missing, raise an error containing that
+field name. If numeric fields are missing, default customer_impact to false,
+error_budget_burn to 0, and signal_count to 0. error_budget_burn is a number and must be
+preserved exactly; do not convert 0.4 to 0. If minute is present, copy it unchanged into
+the normalized output. Do not reject extra raw fields; ignore fields not mentioned here.
+The returned service and region fields are the canonical normalized values, never the
+raw original strings.
+
+## Examples
+
+### A full raw event is provided
+
+When a full raw event is provided, it returns canonical keys and lowercase service and
+region.
+
+Input `raw`:
+```json
+{
+  "event_id": "E-1",
+  "timestamp": "2030-03-01T10:00:00Z",
+  "svc": " Payments-API ",
+  "zone": "US-EAST",
+  "customer_impact": true,
+  "error_budget_burn": 0.4,
+  "signal_count": 12,
+  "fingerprint": "pay-500"
+}
+```
+
+Returns:
+```json
+{
+  "event_id": "E-1",
+  "timestamp": "2030-03-01T10:00:00Z",
+  "service": "payments-api",
+  "region": "us-east",
+  "customer_impact": true,
+  "error_budget_burn": 0.4,
+  "signal_count": 12,
+  "fingerprint": "pay-500"
+}
+```
+
+### Region and numeric fields are omitted
+
+When region and numeric fields are omitted, defaults are applied.
+
+Input `raw`:
+```json
+{
+  "event_id": "E-2",
+  "timestamp": "2030-03-01T10:05:00Z",
+  "service": "Search",
+  "fingerprint": "search-latency"
+}
+```
+
+Returns:
+```json
+{
+  "event_id": "E-2",
+  "timestamp": "2030-03-01T10:05:00Z",
+  "service": "search",
+  "region": "global",
+  "customer_impact": false,
+  "error_budget_burn": 0,
+  "signal_count": 0,
+  "fingerprint": "search-latency"
+}
+```
+
+### The service alias is svc and region is omitted
+
+When the service alias is svc and region is omitted, service still normalizes and region
+defaults.
+
+Input `raw`:
+```json
+{
+  "event_id": "E-2B",
+  "timestamp": "2030-03-01T10:06:00Z",
+  "svc": "Docs",
+  "fingerprint": "docs-500"
+}
+```
+
+Returns:
+```json
+{
+  "event_id": "E-2B",
+  "timestamp": "2030-03-01T10:06:00Z",
+  "service": "docs",
+  "region": "global",
+  "customer_impact": false,
+  "error_budget_burn": 0,
+  "signal_count": 0,
+  "fingerprint": "docs-500"
+}
+```
+
+### Service is missing
+
+When service is missing, it errors.
+
+Input `raw`:
+```json
+{
+  "event_id": "E-3",
+  "timestamp": "2030-03-01T10:05:00Z",
+  "fingerprint": "x"
+}
+```
+
+Fails with error containing: service
+
+### Timestamp is missing
+
+When timestamp is missing, it errors.
+
+Input `raw`:
+```json
+{
+  "event_id": "E-3B",
+  "service": "api",
+  "fingerprint": "api-500"
+}
+```
+
+Fails with error containing: timestamp
+
+### Fingerprint is missing
+
+When fingerprint is missing, it errors.
+
+Input `raw`:
+```json
+{
+  "event_id": "E-3C",
+  "timestamp": "2030-03-01T10:05:00Z",
+  "service": "api"
+}
+```
+
+Fails with error containing: fingerprint
+
+### Minute is present
+
+When minute is present, it is preserved.
+
+Input `raw`:
+```json
+{
+  "event_id": "E-4",
+  "timestamp": "2030-03-01T10:07:00Z",
+  "service": "API",
+  "region": "EU",
+  "fingerprint": "api-500",
+  "minute": 210
+}
+```
+
+Returns:
+```json
+{
+  "event_id": "E-4",
+  "timestamp": "2030-03-01T10:07:00Z",
+  "service": "api",
+  "region": "eu",
+  "customer_impact": false,
+  "error_budget_burn": 0,
+  "signal_count": 0,
+  "fingerprint": "api-500",
+  "minute": 210
+}
+```
+
+### Explicit service and region win over aliases
+
+When both canonical fields and aliases are present, canonical fields win.
+
+Input `raw`:
+```json
+{
+  "event_id": "E-5",
+  "timestamp": "2030-03-01T10:08:00Z",
+  "service": " Search ",
+  "svc": "Payments-API",
+  "region": " EU ",
+  "zone": "US-EAST",
+  "fingerprint": "search-500",
+  "extra": "ignored"
+}
+```
+
+Returns:
+```json
+{
+  "event_id": "E-5",
+  "timestamp": "2030-03-01T10:08:00Z",
+  "service": "search",
+  "region": "eu",
+  "customer_impact": false,
+  "error_budget_burn": 0,
+  "signal_count": 0,
+  "fingerprint": "search-500"
+}
+```

@@ -1,0 +1,36 @@
+# Checkout
+
+> Boundary: `checkout(url: string, qty: number) -> number`
+> Uses: `fetch_price`
+
+## Purpose
+
+This chapter defines the public behavior of `checkout`.
+
+## Behavior
+
+Get the unit price for the URL by calling fetch_price, then multiply it by qty to get
+the order total.
+
+## Examples
+
+### The URL serves {"price": 2.50} and qty is 4
+
+When the URL serves {"price": 2.50} and qty is 4, it returns 10.0.
+
+Fixture `http_fixture`:
+```json
+{
+  "price": 2.5
+}
+```
+
+Input `qty`:
+```json
+4
+```
+
+Returns:
+```json
+10.0
+```

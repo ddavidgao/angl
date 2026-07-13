@@ -1,0 +1,148 @@
+# Route Owner
+
+> Boundary: `route_owner(event: object, severity: string) -> object`
+> Runs as: `ruby`
+
+## Purpose
+
+This chapter defines the public behavior of `route_owner`.
+
+## Behavior
+
+Route a normalized incident event to an owning team. payments-api goes to payments.
+search goes to search. unknown services go to platform. If severity is "sev1", page the
+sre-oncall escalation instead of any team's normal channel, but keep the team name.
+Return a plain object with team, channel, and page fields. For non-sev1 incidents, page
+is false and channel is "team-" plus the team name.
+
+## Examples
+
+### Payments has sev2
+
+When payments has sev2, route to payments team channel without paging.
+
+Input `event`:
+```json
+{
+  "service": "payments-api",
+  "region": "us-east"
+}
+```
+
+Input `severity`:
+```json
+"sev2"
+```
+
+Returns:
+```json
+{
+  "team": "payments",
+  "channel": "team-payments",
+  "page": false
+}
+```
+
+### Search has sev3
+
+When search has sev3, route to search team channel without paging.
+
+Input `event`:
+```json
+{
+  "service": "search",
+  "region": "global"
+}
+```
+
+Input `severity`:
+```json
+"sev3"
+```
+
+Returns:
+```json
+{
+  "team": "search",
+  "channel": "team-search",
+  "page": false
+}
+```
+
+### Payments has sev1
+
+When payments has sev1, keep payments team but page sre-oncall.
+
+Input `event`:
+```json
+{
+  "service": "payments-api",
+  "region": "us-east"
+}
+```
+
+Input `severity`:
+```json
+"sev1"
+```
+
+Returns:
+```json
+{
+  "team": "payments",
+  "channel": "sre-oncall",
+  "page": true
+}
+```
+
+### Unknown service has sev1
+
+When unknown service has sev1, route to platform and page sre-oncall.
+
+Input `event`:
+```json
+{
+  "service": "unknown",
+  "region": "eu"
+}
+```
+
+Input `severity`:
+```json
+"sev1"
+```
+
+Returns:
+```json
+{
+  "team": "platform",
+  "channel": "sre-oncall",
+  "page": true
+}
+```
+
+### Unknown service has sev2
+
+When unknown service has sev2, route to platform team channel without paging.
+
+Input `event`:
+```json
+{
+  "service": "unknown",
+  "region": "eu"
+}
+```
+
+Input `severity`:
+```json
+"sev2"
+```
+
+Returns:
+```json
+{
+  "team": "platform",
+  "channel": "team-platform",
+  "page": false
+}
+```

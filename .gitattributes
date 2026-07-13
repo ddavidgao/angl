@@ -1,0 +1,12 @@
+# GitHub Linguist cannot display Angl as a language until Angl is added upstream.
+# Use Markdown highlighting because .angl chapters are prose-first documents with
+# fenced JSON examples, not Python source.
+*.angl linguist-language=Markdown linguist-detectable
+
+# Keep the language bar focused on the toolchain and chapter sources.
+docs/** linguist-documentation
+
+# Generated proof media belongs in release assets or the website, not language stats.
+*.gif linguist-generated
+*.cast linguist-generated
+*.mp4 linguist-generated

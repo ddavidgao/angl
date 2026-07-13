@@ -1,0 +1,81 @@
+# Provision Service
+
+> Boundary: `provision_service(service_name: string, region: string, max_retries: number, timeout_seconds: number) -> object`
+> Uses: `validate_config`
+
+## Purpose
+
+This chapter defines the public behavior of `provision_service`.
+
+## Behavior
+
+Provision a service: validate the given region, max_retries, and timeout_seconds by
+calling validate_config, then return a plain dict describing the provisioned service
+with keys service_name, status (the literal string "provisioned"), and config (the
+validated config dict returned by validate_config). If validate_config raises, let the
+error propagate unchanged.
+
+## Examples
+
+### The config is valid
+
+When the config is valid, it returns a provisioned service dict.
+
+Input `service_name`:
+```json
+"orders-api"
+```
+
+Input `region`:
+```json
+"us-east"
+```
+
+Input `max_retries`:
+```json
+3
+```
+
+Input `timeout_seconds`:
+```json
+30.0
+```
+
+Returns:
+```json
+{
+  "service_name": "orders-api",
+  "status": "provisioned",
+  "config": {
+    "region": "us-east",
+    "max_retries": 3,
+    "timeout_seconds": 30.0
+  }
+}
+```
+
+### The config is invalid
+
+When the config is invalid, the error from validate_config propagates.
+
+Input `service_name`:
+```json
+"orders-api"
+```
+
+Input `region`:
+```json
+"us-east"
+```
+
+Input `max_retries`:
+```json
+0
+```
+
+Input `timeout_seconds`:
+```json
+30.0
+```
+
+Fails with error containing: max_retries

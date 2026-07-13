@@ -1,0 +1,104 @@
+# Picnic Menu
+
+> Boundary: `picnic_menu(picnic: object) -> object`
+> Runs as: `node`
+
+## Purpose
+
+This chapter defines the public behavior of `picnic_menu`.
+
+## Behavior
+
+Choose a friendly picnic menu from a normalized picnic request. Use these rules:
+
+- vegetarian picnics get veggie wraps
+- other picnics get turkey sandwiches
+- hot weather, at least 85 degrees, gets lemonade
+- milder weather gets sparkling water
+- picnics with kids get fruit skewers
+- other picnics get trail mix
+- birthday picnics get cupcakes
+- other picnics get cookies
+
+Return the main, drink, snack, dessert, and servings. Servings should equal guests.
+
+## Examples
+
+### The picnic is hot
+
+When the picnic is hot, vegetarian, for kids, and a birthday, choose cool vegetarian
+party food.
+
+Input `picnic`:
+```json
+{
+  "guests": 6,
+  "temperature_f": 88,
+  "kids": true,
+  "vegetarian": true,
+  "mood": "birthday"
+}
+```
+
+Returns:
+```json
+{
+  "main": "veggie wraps",
+  "drink": "lemonade",
+  "snack": "fruit skewers",
+  "dessert": "cupcakes",
+  "servings": 6
+}
+```
+
+### The picnic is mild and non-vegetarian
+
+When the picnic is mild and non-vegetarian, choose the standard menu.
+
+Input `picnic`:
+```json
+{
+  "guests": 3,
+  "temperature_f": 70,
+  "kids": false,
+  "vegetarian": false,
+  "mood": "easy"
+}
+```
+
+Returns:
+```json
+{
+  "main": "turkey sandwiches",
+  "drink": "sparkling water",
+  "snack": "trail mix",
+  "dessert": "cookies",
+  "servings": 3
+}
+```
+
+### The picnic is hot but has no kids
+
+When the picnic is hot but has no kids, only the drink changes.
+
+Input `picnic`:
+```json
+{
+  "guests": 2,
+  "temperature_f": 91,
+  "kids": false,
+  "vegetarian": false,
+  "mood": "easy"
+}
+```
+
+Returns:
+```json
+{
+  "main": "turkey sandwiches",
+  "drink": "lemonade",
+  "snack": "trail mix",
+  "dessert": "cookies",
+  "servings": 2
+}
+```

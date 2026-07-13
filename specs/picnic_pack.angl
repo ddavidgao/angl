@@ -1,0 +1,132 @@
+# Picnic Pack
+
+> Boundary: `picnic_pack(picnic: object, menu: object) -> object`
+> Runs as: `ruby`
+
+## Purpose
+
+This chapter defines the public behavior of `picnic_pack`.
+
+## Behavior
+
+Build a compact packing checklist. Always pack:
+
+- blanket
+- napkins
+- plates
+- cups
+- trash bag
+- water
+
+Add sunscreen when temperature_f is at least 80. Add a kite when kids are coming. Add a
+cooler when the drink is lemonade. Return the item list and the item count.
+
+## Examples
+
+### It is hot
+
+When it is hot, kids are coming, and the drink is lemonade, include sunscreen, kite, and
+cooler.
+
+Input `picnic`:
+```json
+{
+  "temperature_f": 88,
+  "kids": true
+}
+```
+
+Input `menu`:
+```json
+{
+  "drink": "lemonade"
+}
+```
+
+Returns:
+```json
+{
+  "items": [
+    "blanket",
+    "napkins",
+    "plates",
+    "cups",
+    "trash bag",
+    "water",
+    "sunscreen",
+    "kite",
+    "cooler"
+  ],
+  "count": 9
+}
+```
+
+### It is mild and no kids are coming
+
+When it is mild and no kids are coming, include only the basics.
+
+Input `picnic`:
+```json
+{
+  "temperature_f": 70,
+  "kids": false
+}
+```
+
+Input `menu`:
+```json
+{
+  "drink": "sparkling water"
+}
+```
+
+Returns:
+```json
+{
+  "items": [
+    "blanket",
+    "napkins",
+    "plates",
+    "cups",
+    "trash bag",
+    "water"
+  ],
+  "count": 6
+}
+```
+
+### It is hot but there are no kids and no lemonade
+
+When it is hot but there are no kids and no lemonade, include sunscreen but not kite or
+cooler.
+
+Input `picnic`:
+```json
+{
+  "temperature_f": 82,
+  "kids": false
+}
+```
+
+Input `menu`:
+```json
+{
+  "drink": "sparkling water"
+}
+```
+
+Returns:
+```json
+{
+  "items": [
+    "blanket",
+    "napkins",
+    "plates",
+    "cups",
+    "trash bag",
+    "water",
+    "sunscreen"
+  ],
+  "count": 7
+}
+```

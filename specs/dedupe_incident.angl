@@ -1,0 +1,204 @@
+# Dedupe Incident
+
+> Boundary: `dedupe_incident(event: object, open_incidents: object) -> object`
+> Runs as: `go`
+
+## Purpose
+
+This chapter defines the public behavior of `dedupe_incident`.
+
+## Behavior
+
+Determine whether a normalized event matches an existing open incident. open_incidents
+is a list of objects with incident_id, fingerprint, region, and last_seen_minute. The
+event has fingerprint, region, and minute. If an open incident has the same fingerprint
+and same region and the event minute is at most 30 minutes after last_seen_minute,
+return {"duplicate": true, "incident_id": existing id}. Otherwise return {"duplicate":
+false, "incident_id": null}. If event minute is missing, raise an error containing
+"minute".
+
+## Examples
+
+### Same fingerprint and region is inside the window
+
+When same fingerprint and region is inside the window, it dedupes.
+
+Input `event`:
+```json
+{
+  "fingerprint": "pay-500",
+  "region": "us-east",
+  "minute": 120
+}
+```
+
+Input `open_incidents`:
+```json
+[
+  {
+    "incident_id": "INC-7",
+    "fingerprint": "pay-500",
+    "region": "us-east",
+    "last_seen_minute": 100
+  }
+]
+```
+
+Returns:
+```json
+{
+  "duplicate": true,
+  "incident_id": "INC-7"
+}
+```
+
+### Same fingerprint is outside the window
+
+When same fingerprint is outside the window, it does not dedupe.
+
+Input `event`:
+```json
+{
+  "fingerprint": "pay-500",
+  "region": "us-east",
+  "minute": 140
+}
+```
+
+Input `open_incidents`:
+```json
+[
+  {
+    "incident_id": "INC-7",
+    "fingerprint": "pay-500",
+    "region": "us-east",
+    "last_seen_minute": 100
+  }
+]
+```
+
+Returns:
+```json
+{
+  "duplicate": false,
+  "incident_id": null
+}
+```
+
+### Same fingerprint is exactly at the window boundary
+
+When same fingerprint and region is exactly 30 minutes after last_seen_minute, it dedupes.
+
+Input `event`:
+```json
+{
+  "fingerprint": "pay-500",
+  "region": "us-east",
+  "minute": 130
+}
+```
+
+Input `open_incidents`:
+```json
+[
+  {
+    "incident_id": "INC-7",
+    "fingerprint": "pay-500",
+    "region": "us-east",
+    "last_seen_minute": 100
+  }
+]
+```
+
+Returns:
+```json
+{
+  "duplicate": true,
+  "incident_id": "INC-7"
+}
+```
+
+### Event before the incident window does not dedupe
+
+When the event minute is before last_seen_minute, it does not dedupe.
+
+Input `event`:
+```json
+{
+  "fingerprint": "pay-500",
+  "region": "us-east",
+  "minute": 90
+}
+```
+
+Input `open_incidents`:
+```json
+[
+  {
+    "incident_id": "INC-7",
+    "fingerprint": "pay-500",
+    "region": "us-east",
+    "last_seen_minute": 100
+  }
+]
+```
+
+Returns:
+```json
+{
+  "duplicate": false,
+  "incident_id": null
+}
+```
+
+### Region differs
+
+When region differs, it does not dedupe.
+
+Input `event`:
+```json
+{
+  "fingerprint": "pay-500",
+  "region": "eu",
+  "minute": 110
+}
+```
+
+Input `open_incidents`:
+```json
+[
+  {
+    "incident_id": "INC-7",
+    "fingerprint": "pay-500",
+    "region": "us-east",
+    "last_seen_minute": 100
+  }
+]
+```
+
+Returns:
+```json
+{
+  "duplicate": false,
+  "incident_id": null
+}
+```
+
+### Minute is missing
+
+When minute is missing, it errors.
+
+Input `event`:
+```json
+{
+  "fingerprint": "pay-500",
+  "region": "us-east"
+}
+```
+
+Input `open_incidents`:
+```json
+[]
+```
+
+Fails with error containing: minute

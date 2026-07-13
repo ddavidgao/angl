@@ -1,0 +1,157 @@
+# Route Path
+
+> Boundary: `route_path(edges: object, start: string, goal: string) -> object`
+
+## Purpose
+
+This chapter defines the public behavior of `route_path`.
+
+## Behavior
+
+Find the cheapest route through a weighted directed graph. Each edge is a three-item
+list [from, to, cost], where from and to are strings and cost is a non-negative number.
+Return a plain object with keys cost and path. The path is a list of node names from
+start to goal. If no route exists, raise an error whose message contains "unreachable".
+Important edge direction detail: [from, to, cost] means travel is allowed from the first
+node to the second node with the given cost. Do not reverse the edge direction.
+Important graph detail: a node may appear only as an edge destination and never as an
+edge source. That node is still a real graph node and must not cause a key error during
+distance tracking or path reconstruction.
+
+## Examples
+
+### A cheaper indirect route exists
+
+When a cheaper indirect route exists, it returns that route.
+
+Input `edges`:
+```json
+[
+  [
+    "api",
+    "cache",
+    4
+  ],
+  [
+    "api",
+    "queue",
+    2
+  ],
+  [
+    "queue",
+    "cache",
+    1
+  ],
+  [
+    "cache",
+    "db",
+    2
+  ],
+  [
+    "queue",
+    "db",
+    5
+  ]
+]
+```
+
+Input `start`:
+```json
+"api"
+```
+
+Input `goal`:
+```json
+"db"
+```
+
+Returns:
+```json
+{
+  "cost": 5,
+  "path": [
+    "api",
+    "queue",
+    "cache",
+    "db"
+  ]
+}
+```
+
+### The direct route is cheapest
+
+When the direct route is cheapest, it returns the direct route.
+
+Input `edges`:
+```json
+[
+  [
+    "api",
+    "db",
+    3
+  ],
+  [
+    "api",
+    "queue",
+    2
+  ],
+  [
+    "queue",
+    "db",
+    5
+  ]
+]
+```
+
+Input `start`:
+```json
+"api"
+```
+
+Input `goal`:
+```json
+"db"
+```
+
+Returns:
+```json
+{
+  "cost": 3,
+  "path": [
+    "api",
+    "db"
+  ]
+}
+```
+
+### The goal cannot be reached
+
+When the goal cannot be reached, it errors.
+
+Input `edges`:
+```json
+[
+  [
+    "api",
+    "cache",
+    1
+  ],
+  [
+    "queue",
+    "db",
+    1
+  ]
+]
+```
+
+Input `start`:
+```json
+"api"
+```
+
+Input `goal`:
+```json
+"db"
+```
+
+Fails with error containing: unreachable

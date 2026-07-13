@@ -1,0 +1,103 @@
+# Format Incident Title
+
+> Boundary: `format_incident_title(event: object, severity: string) -> string`
+> Runs as: `typescript`
+
+## Purpose
+
+This chapter defines the public behavior of `format_incident_title`.
+
+## Behavior
+
+Create a short incident title for humans. Use the uppercase severity, then the service,
+then the region in parentheses. The event is already normalized.
+
+## Examples
+
+### Payments is sev1 in us-east
+
+When payments is sev1 in us-east, it formats the title.
+
+Input `event`:
+```json
+{
+  "service": "payments-api",
+  "region": "us-east"
+}
+```
+
+Input `severity`:
+```json
+"sev1"
+```
+
+Returns:
+```json
+"SEV1 payments-api (us-east)"
+```
+
+### Search is sev2 in global
+
+When search is sev2 in global, it formats the title.
+
+Input `event`:
+```json
+{
+  "service": "search",
+  "region": "global"
+}
+```
+
+Input `severity`:
+```json
+"sev2"
+```
+
+Returns:
+```json
+"SEV2 search (global)"
+```
+
+### Docs is sev3 in eu
+
+When docs is sev3 in eu, it formats the title.
+
+Input `event`:
+```json
+{
+  "service": "docs",
+  "region": "eu"
+}
+```
+
+Input `severity`:
+```json
+"sev3"
+```
+
+Returns:
+```json
+"SEV3 docs (eu)"
+```
+
+### Already uppercase severity is preserved
+
+When severity is already uppercase, it formats the same title.
+
+Input `event`:
+```json
+{
+  "service": "billing-worker",
+  "region": "us-west"
+}
+```
+
+Input `severity`:
+```json
+"SEV2"
+```
+
+Returns:
+```json
+"SEV2 billing-worker (us-west)"
+```

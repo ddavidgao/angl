@@ -1,0 +1,14 @@
+# Project
+
+> Stack: `local_multitarget_library`
+> UI: `static_html`
+> API: `python`
+> Data: `json`
+> Runtime: `local_subprocesses_and_docker`
+
+## Rules
+
+- Chapters define public behavior.
+- Generated helper files are private implementation details.
+- Generated code is not edited by hand.
+- If a generated boundary matters to a human, promote it to a chapter.

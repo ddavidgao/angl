@@ -1,0 +1,153 @@
+# Picnic Plan
+
+> Boundary: `picnic_plan(request: object) -> object`
+> Uses: `picnic_normalize`, `picnic_menu`, `picnic_pack`
+
+## Purpose
+
+This chapter defines the public behavior of `picnic_plan`.
+
+## Behavior
+
+Create the final picnic plan. First normalize the request. Then choose the menu. Then
+build the packing checklist. Use a short schedule when the picnic is two hours or less:
+
+- arrive
+- eat
+- play
+- pack up
+
+Use a longer schedule when the picnic lasts more than two hours:
+
+- arrive
+- set up
+- eat
+- play
+- dessert
+- pack up
+
+Return location, guests, mood, menu, packing, schedule, and headline. The headline
+should read: "Picnic for N at LOCATION".
+
+## Examples
+
+### Planning a beach birthday picnic
+
+When planning a beach birthday picnic, compose the full plan.
+
+Input `request`:
+```json
+{
+  "guests": 6,
+  "budget": 90,
+  "temperature_f": 88,
+  "hours": 4,
+  "kids": true,
+  "vegetarian": true,
+  "location": "beach",
+  "mood": "birthday"
+}
+```
+
+Returns:
+```json
+{
+  "location": "beach",
+  "guests": 6,
+  "mood": "birthday",
+  "menu": {
+    "main": "veggie wraps",
+    "drink": "lemonade",
+    "snack": "fruit skewers",
+    "dessert": "cupcakes",
+    "servings": 6
+  },
+  "packing": {
+    "items": [
+      "blanket",
+      "napkins",
+      "plates",
+      "cups",
+      "trash bag",
+      "water",
+      "sunscreen",
+      "kite",
+      "cooler"
+    ],
+    "count": 9
+  },
+  "schedule": [
+    "arrive",
+    "set up",
+    "eat",
+    "play",
+    "dessert",
+    "pack up"
+  ],
+  "headline": "Picnic for 6 at beach"
+}
+```
+
+### Planning a small easy park picnic
+
+When planning a small easy park picnic, compose the short plan.
+
+Input `request`:
+```json
+{
+  "guests": 3,
+  "temperature_f": 70,
+  "kids": false,
+  "vegetarian": false,
+  "location": "park",
+  "mood": "easy",
+  "hours": 2
+}
+```
+
+Returns:
+```json
+{
+  "location": "park",
+  "guests": 3,
+  "mood": "easy",
+  "menu": {
+    "main": "turkey sandwiches",
+    "drink": "sparkling water",
+    "snack": "trail mix",
+    "dessert": "cookies",
+    "servings": 3
+  },
+  "packing": {
+    "items": [
+      "blanket",
+      "napkins",
+      "plates",
+      "cups",
+      "trash bag",
+      "water"
+    ],
+    "count": 6
+  },
+  "schedule": [
+    "arrive",
+    "eat",
+    "play",
+    "pack up"
+  ],
+  "headline": "Picnic for 3 at park"
+}
+```
+
+### Guests is invalid
+
+When guests is invalid, the normalization error propagates.
+
+Input `request`:
+```json
+{
+  "guests": 0
+}
+```
+
+Fails with error containing: guests

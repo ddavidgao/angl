@@ -1,0 +1,16 @@
+build/
+__pycache__/
+.venv*/
+*.egg-info/
+dist/
+*.tgz
+
+# generated launch/demo media
+*.mp4
+*.gif
+*.cast
+launch/
+
+# local ops / infra — never commit
+ops.local.md
+*.local.md

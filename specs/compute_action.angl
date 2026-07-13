@@ -1,0 +1,120 @@
+# Compute Action
+
+> Boundary: `compute_action(owner: object, dedupe: object) -> string`
+> Runs as: `rust`
+
+## Purpose
+
+This chapter defines the public behavior of `compute_action`.
+
+## Behavior
+
+Choose the final incident action. If dedupe says duplicate is true, return "attach-to-
+existing". Otherwise, if owner says page is true, return "page-and-create". Otherwise
+return "create-ticket".
+
+## Examples
+
+### The incident is a duplicate
+
+When the incident is a duplicate, attach to existing.
+
+Input `owner`:
+```json
+{
+  "team": "search",
+  "channel": "team-search",
+  "page": false
+}
+```
+
+Input `dedupe`:
+```json
+{
+  "duplicate": true,
+  "incident_id": "INC-42"
+}
+```
+
+Returns:
+```json
+"attach-to-existing"
+```
+
+### Duplicate wins over paging
+
+When the incident is a duplicate and owner says page, attach to existing.
+
+Input `owner`:
+```json
+{
+  "team": "payments",
+  "channel": "sre-oncall",
+  "page": true
+}
+```
+
+Input `dedupe`:
+```json
+{
+  "duplicate": true,
+  "incident_id": "INC-99"
+}
+```
+
+Returns:
+```json
+"attach-to-existing"
+```
+
+### The incident is new and should page
+
+When the incident is new and should page, page and create.
+
+Input `owner`:
+```json
+{
+  "team": "payments",
+  "channel": "sre-oncall",
+  "page": true
+}
+```
+
+Input `dedupe`:
+```json
+{
+  "duplicate": false,
+  "incident_id": null
+}
+```
+
+Returns:
+```json
+"page-and-create"
+```
+
+### The incident is new and should not page
+
+When the incident is new and should not page, create a ticket.
+
+Input `owner`:
+```json
+{
+  "team": "search",
+  "channel": "team-search",
+  "page": false
+}
+```
+
+Input `dedupe`:
+```json
+{
+  "duplicate": false,
+  "incident_id": null
+}
+```
+
+Returns:
+```json
+"create-ticket"
+```

@@ -1,0 +1,88 @@
+# Validate Config
+
+> Boundary: `validate_config(region: string, max_retries: number, timeout_seconds: number) -> object`
+
+## Purpose
+
+This chapter defines the public behavior of `validate_config`.
+
+## Behavior
+
+Validate service configuration for a deployable service. The region must be a non-empty
+string. max_retries must be a positive integer. timeout_seconds must be a positive
+number. Return validated data as a plain object with keys region, max_retries, and
+timeout_seconds. If max_retries or timeout_seconds is not positive, raise an error whose
+message contains the literal field name that failed, such as "max_retries" or
+"timeout_seconds".
+
+## Examples
+
+### All fields are valid
+
+When all fields are valid, it returns the validated dict.
+
+Input `region`:
+```json
+"us-east"
+```
+
+Input `max_retries`:
+```json
+3
+```
+
+Input `timeout_seconds`:
+```json
+30.0
+```
+
+Returns:
+```json
+{
+  "region": "us-east",
+  "max_retries": 3,
+  "timeout_seconds": 30.0
+}
+```
+
+### Max_retries is zero or negative
+
+When max_retries is zero or negative, it errors.
+
+Input `region`:
+```json
+"us-east"
+```
+
+Input `max_retries`:
+```json
+0
+```
+
+Input `timeout_seconds`:
+```json
+30.0
+```
+
+Fails with error containing: max_retries
+
+### Timeout_seconds is zero or negative
+
+When timeout_seconds is zero or negative, it errors.
+
+Input `region`:
+```json
+"us-east"
+```
+
+Input `max_retries`:
+```json
+3
+```
+
+Input `timeout_seconds`:
+```json
+-1
+```
+
+Fails with error containing: timeout_seconds
